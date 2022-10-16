@@ -1,5 +1,7 @@
 #include<iostream>
 using namespace std;
+//when the new element is a better option than the element at the tail, the element leaves the queue from the tail. 
+//when the oldest element in the queue is out of the sliding window, it leaves from the head.
 int n,k,a[1000004],q1[1000004],head=1,tail=0;
 void read(){
 	cin>>n>>k;
