@@ -1,7 +1,4 @@
 #include<iostream>
-#include<algorithm>
-#include<cstdlib>
-#include<vector>
 using namespace std;
 int n,k,a[1000004],q1[1000004],head=1,tail=0;
 void read(){
