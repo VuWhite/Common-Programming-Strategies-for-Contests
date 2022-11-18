@@ -1,36 +1,91 @@
 #include <iostream>
 using namespace std;
-const int N=200010;
-int st[4*N],arr[N];
-int query(int p, int l, int r, int ql, int qr){
-	if(ql>r||qr<l)
-		return 0;
-	if(ql<=l&&qr>=r)
-		return st[p];
-	int m=l+((r-l)>>1);
-	return query(2*p,l,m,ql,qr)+query(2*p+1,m+1,r,ql,qr);
+int Euclidean(int x,int y){
+
+	while(x%y!=0){
+		int r=x%y;
+		x=y;
+		y=r;
+	}
+	return y;
 }
-void update(int p, int l, int r, int idx, int val){
+const int N=200010;
+int st[5][4*N],arr[N];
+int query(int q,int p, int l, int r, int ql, int qr){
+	if(ql>r||qr<l){
+		if(q==0)
+			return 0;
+		else if(q==1)
+			return 1000000;
+		else if(q==4)
+			return 1;
+	}
+	if(ql<=l&&qr>=r)
+		return st[q][p];
+	int m=l+((r-l)>>1);
+	if(q==0)
+		return query(q,2*p,l,m,ql,qr)+query(q,2*p+1,m+1,r,ql,qr);
+	if(q==1)
+		return min(query(q,2*p,l,m,ql,qr),query(q,2*p+1,m+1,r,ql,qr));
+	if(q==2){
+		if(!(ql>m||qr<l)&&!(ql>r||qr<m+1))
+			return Euclidean(query(q,2*p,l,m,ql,qr),query(q,2*p+1,m+1,r,ql,qr));
+		else if(!(ql>m||qr<l))
+			return query(q,2*p,l,m,ql,qr);
+		else if(!(ql>r||qr<l))
+			return query(q,2*p+1,m+1,r,ql,qr);
+	}
+	if(q==3){
+		if(!(ql>m||qr<l)&&!(ql>r||qr<m+1))
+			return query(q,2*p,l,m,ql,qr)^query(q,2*p+1,m+1,r,ql,qr);
+		else if(!(ql>m||qr<l))
+			return query(q,2*p,l,m,ql,qr);
+		else if(!(ql>r||qr<l))
+			return query(q,2*p+1,m+1,r,ql,qr);
+	}
+		
+	if(q==4)
+		return query(q,2*p,l,m,ql,qr)*query(q,2*p+1,m+1,r,ql,qr)%10007;
+}
+void update(int q,int p, int l, int r, int idx, int val){
 	if(l==r){
-		st[p]=val;
+		st[q][p]=val;
 		return;
 	}
 	int m=l+((r-l)>>1);
 	if(idx<=m)
-		update(p*2,l,m,idx,val);
+		update(q,p*2,l,m,idx,val);
 	else
-		update(2*p+1,m+1,r,idx,val);
-	st[p]=st[2*p]+st[2*p+1];
+		update(q,2*p+1,m+1,r,idx,val);
+	if(q==0)
+		st[q][p]=st[q][p*2]+st[q][p*2+1];
+	else if(q==1)
+		st[q][p]=min(st[q][p*2],st[q][p*2+1]);
+	else if(q==2)
+		st[q][p]=Euclidean(st[q][p*2],st[q][p*2+1]);
+	else if(q==3)
+		st[q][p]=st[q][p*2]^st[q][p*2+1];
+	else
+		st[q][p]=st[q][p*2]*st[q][p*2+1]%10007;
 	return;
 }
-void build(int p, int l, int r){
+void build(int q,int p, int l, int r){
 	if(l==r){
-		st[p]=arr[l];
+		st[q][p]=arr[l];
 		return;
 	}
 	int m = l+((r-l)>>1);
-	build(p*2,l,m),build(2*p+1,m+1,r);
-	st[p]=st[p*2]+st[p*2+1];
+	build(q,p*2,l,m),build(q,2*p+1,m+1,r);
+	if(q==0)
+		st[q][p]=st[q][p*2]+st[q][p*2+1];
+	else if(q==1)
+		st[q][p]=min(st[q][p*2],st[q][p*2+1]);
+	else if(q==2)
+		st[q][p]=Euclidean(st[q][p*2],st[q][p*2+1]);
+	else if(q==3)
+		st[q][p]=st[q][p*2]^st[q][p*2+1];
+	else
+		st[q][p]=st[q][p*2]*st[q][p*2+1]%10007;
 	return;
 }
 int main(){
@@ -38,14 +93,22 @@ int main(){
 	for(int i=1;i<=n;i++){
 		cin>>arr[i];
 	}
-	build(1,1,n);
+	for(int i=0;i<=4*n;i++){
+		st[4][i]=1;
+		st[1][i]=100000;
+	}
+	for(int i=1;i<5;i++){
+		build(i,1,1,n);
+	}
 	for(int i=0;i<q;i++){
 		int a,b,c;
 		cin>>a>>b>>c;
-		if(a==1)
-			update(1,1,n,b,c);
+		if(a==1){
+			for(int i=1;i<5;i++)
+				update(i,1,1,n,b,c);
+		}
 		else
-			cout<<query(1,1,n,b,c)<<endl;
+			cout<<query(a-1,1,1,n,b,c)<<endl;
 	}
 	return 0;
 }
