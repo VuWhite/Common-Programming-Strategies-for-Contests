@@ -1,0 +1,36 @@
+#include<iostream>
+#include<set>
+using namespace std;
+int a[100005];
+int main(){
+	int t;cin>>t;
+	while(t>0){
+		int n,m,md=2e9;cin>>n>>m;
+		set<int> st;
+		for(int i=1;i<=n;i++){
+			cin>>a[i];
+			if(md>a[i]){
+				md=a[i];
+				st.insert(i);
+			}
+		}
+		for(int i=0;i<m;i++){
+			int k,d;cin>>k>>d;
+			a[k]-=d;
+			if(a[*--st.upper_bound(k)]>a[k]){
+				st.insert(k);
+			}
+			auto it=st.upper_bound(k);
+			while(it!=st.end()&&a[*it]>=a[k]){
+				st.erase(it++);
+			}
+			cout<<st.size();
+			if(i==m-1)
+				cout<<endl;
+			else
+				cout<<' ';
+		}
+		t--;
+	}
+	return 0;
+}
